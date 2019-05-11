@@ -1,0 +1,62 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 14f2233c4d5af143cbd27ca2e88e796a6cf08391eb02b74873aaec09ff4a037a
+
+name:           lagrange
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/ratatosk/lagrange#readme>
+homepage:       https://github.com/ratatosk/lagrange#readme
+bug-reports:    https://github.com/ratatosk/lagrange/issues
+author:         Pavel Grafov
+maintainer:     graphov@gmail.com
+copyright:      2019 Pavel Grafov
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/ratatosk/lagrange
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_lagrange
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable lagrange-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_lagrange
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , lagrange
+  default-language: Haskell2010
+
+test-suite lagrange-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_lagrange
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , lagrange
+  default-language: Haskell2010
