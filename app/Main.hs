@@ -4,4 +4,4 @@ import Lagrange
 import qualified Graphics.Gnuplot.Simple as GP
 
 main :: IO ()
-main = someFunc
+main = print "Hello"

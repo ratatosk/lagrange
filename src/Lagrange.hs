@@ -10,9 +10,11 @@ import qualified Graphics.Gnuplot.Simple as GPS
 import Numeric.LinearAlgebra.Data
 import Numeric.GSL.Differentiation (derivCentral)
 import Numeric.GSL.Integration (integrateCQUAD)
-inport Numeric.GSL.Interpolation (evluate, CSpline)
+import Numeric.GSL.Interpolation (evaluate, InterpolationMethod(..))
+import Numeric.GSL.Minimization (minimize, MinimizeMethod(..))
 import Numeric.IEEE (epsilon)
 import Data.Tuple.Extra (fst3, curry3, uncurry3)
+import Data.List.Extra (chunksOf)
 
 type Time = R
 type GenCoords = Vector R
@@ -60,31 +62,29 @@ harmonicOscillator m k (t, x, v) =
 linearDots :: Int -> GenCoords -> GenCoords -> [GenCoords]
 linearDots n q0 q1 = error "todo"
 
-linearDots0 :: R -> R -> Int -> [R]
-linearDots0 x0 x1 n = 
+equalSplit :: Int -> R -> R -> [R]
+equalSplit n x0 x1 = 
     let n' = fromIntegral (n + 2) 
     in map (\i -> x0 + (x1 - x0) * fromIntegral i/n') [0..n]
 
+-- TODO: this re-interpolates for each t
 makePathThrough :: Time -> GenCoords -> Time -> GenCoords -> Int -> [GenCoords] -> Path
 makePathThrough t0 q0 t1 q1 n dots t = 
     let dim = size q0
         allCoords = [q0] ++ dots ++ [q1]
-        allTimes = lineardots n t0 t1
+        allTimes = equalSplit n t0 t1
         slice i = map (\d -> d!i) allCoords
         allDots i = zip allTimes (slice i)
-        resultComponent i = evaluate CSpline (alldots i) t
+        resultComponent i = evaluate CSpline (allDots i) t
     in fromList $ map resultComponent [0..dim - 1]
-
-breakVector :: Int -> Vector R -> [Vector R]
-breakVector n v = 
-    let dim = size v / n
-    in map (\i -> subVector (i*n) dim v) [0..n - 1) 
 
 findPath :: Lagrangian -> Time -> GenCoords -> Time -> GenCoords -> Int -> Path
 findPath l t0 q0 t1 q1 n =
-    let adapt vec = makePathThrough t0 q0 t1 q1 n (breakvector n vec)
-        fn dots = action t0 t1 l (makePathThrough t0 q0 t1 q1 n dots)
-        fnV vec = fn (breakVector n)
-        initial = vjoin $ linearDots n q0 q1
-        min = breakVector n $ optimize fnV initial
-    in makePathThrough t0 q0 t1 q1 min
+    let dim = size q0
+        list2Vecs = map fromList . chunksOf dim
+        pathThrough = makePathThrough t0 q0 t1 q1 n . list2Vecs
+        fn = action t0 t1 l . pathThrough
+        initial = concat $ map toList $ linearDots n q0 q1
+        steps = take (dim*n) $ repeat 0.1
+        minVec = fst $ minimize NMSimplex eps 1000 steps fn initial
+    in pathThrough minVec
