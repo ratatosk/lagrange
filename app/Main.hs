@@ -1,6 +1,7 @@
 module Main where
 
-import Lib
+import Lagrange
+import qualified Graphics.Gnuplot.Simple as GP
 
 main :: IO ()
 main = someFunc

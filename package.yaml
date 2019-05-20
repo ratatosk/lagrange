@@ -21,6 +21,11 @@ description:         Please see the README on GitHub at <https://github.com/rata
 
 dependencies:
 - base >= 4.7 && < 5
+- hmatrix
+- hmatrix-gsl
+- gnuplot
+- ieee754
+- extra
 
 library:
   source-dirs: src
